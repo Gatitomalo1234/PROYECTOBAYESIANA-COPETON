@@ -31,41 +31,53 @@ def run_tests():
                 f.write(f"{var}: p-value = {p:.4f} -> {'SIGNIFICATIVO' if p < 0.05 else 'No significativo'}\n")
                 p_values[var] = p
             else:
-                p_values[var] = np.nan
+                p_values[var] = float('nan')
                 
-        # Graficar p-values de los contaminantes
-        plt.figure(figsize=(10,6))
-        # Sort values
-        sorted_p = dict(sorted(p_values.items(), key=lambda item: item[1]))
-        vars_sorted = list(sorted_p.keys())
-        vals_sorted = list(sorted_p.values())
-        
-        colors = ['red' if p < 0.05 else 'gray' for p in vals_sorted]
-        sns.barplot(x=vals_sorted, y=vars_sorted, palette=colors)
-        plt.axvline(0.05, color='orange', linestyle='--', linewidth=2, label='Umbral Significancia (0.05)')
-        plt.title('Valores p (Mann-Whitney U) para Contaminantes vs Detección\n< 0.05 indica que afecta crudamente la detección')
-        plt.xlabel('p-value')
-        plt.xlim(0, max(1.0, max(vals_sorted) + 0.1) if max(vals_sorted) + 0.1 <= 1 else 1.0)
-        plt.legend()
-        plt.tight_layout()
-        plt.savefig(os.path.join(PLOT_DIR, 'pvalues_mannwhitney.png'))
-        plt.close()
-            
         # 2. Variables de Esfuerzo de Muestreo (Numéricas - Mann-Whitney U)
         f.write("\n--- VARIABLES DE ESFUERZO HUMANO (Mann-Whitney U) ---\n")
-        for var in ['DURATION MINUTES', 'EFFORT DISTANCE KM', 'NUMBER OBSERVERS']:
+        effort_vars = ['DURATION MINUTES', 'EFFORT DISTANCE KM']
+        for var in effort_vars:
             group0 = df[df['y_copeton']==0][var].dropna()
             group1 = df[df['y_copeton']==1][var].dropna()
             if len(group0) > 0 and len(group1) > 0:
                 stat, p = mannwhitneyu(group0, group1, alternative='two-sided')
                 f.write(f"{var}: p-value = {p:.4f} -> {'SIGNIFICATIVO' if p < 0.05 else 'No significativo'}\n")
+                p_values[var] = p
+                
+        # Graficar p-values divididos en dos gráficos (Biológico y Metodológico)
+        p_values_bio = {k: v for k, v in p_values.items() if k in pollutants and not pd.isna(v)}
+        p_values_method = {k: v for k, v in p_values.items() if k in effort_vars and not pd.isna(v)}
+        
+        def plot_pvalues(p_dict, title, filename):
+            plt.figure(figsize=(10,4))
+            sorted_p = dict(sorted(p_dict.items(), key=lambda item: item[1]))
+            vars_sorted = list(sorted_p.keys())
+            vals_sorted = list(sorted_p.values())
+            
+            colors = ['red' if p < 0.05 else 'gray' for p in vals_sorted]
+            sns.barplot(x=vals_sorted, y=vars_sorted, palette=colors)
+            plt.axvline(0.05, color='orange', linestyle='--', linewidth=2, label='Umbral Significancia (0.05)')
+            plt.title(title)
+            plt.xlabel('p-value puro (Barras pegadas al 0 son EXTREMADAMENTE significativas)')
+            plt.xlim(0, max(1.0, max(vals_sorted) + 0.1) if len(vals_sorted)>0 and max(vals_sorted) + 0.1 <= 1 else 1.0)
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(os.path.join(PLOT_DIR, filename))
+            plt.close()
+
+        plot_pvalues(p_values_bio, 'Valores p (Mann-Whitney) - Componente Biológico', 'pvalues_mannwhitney_bio.png')
+        plot_pvalues(p_values_method, 'Valores p (Mann-Whitney) - Componente Metodológico', 'pvalues_mannwhitney_method.png')
                 
         # 3. Variables Categóricas (Chi-Cuadrado)
         f.write("\n--- VARIABLES CATEGÓRICAS vs y_copeton (Chi-Cuadrado) ---\n")
+        chi2_p_values = {}
         for var in ['PROTOCOL NAME', 'month', 'nearest_station']:
             contingency_table = pd.crosstab(df['y_copeton'], df[var])
             stat, p, dof, expected = chi2_contingency(contingency_table)
             f.write(f"{var}: p-value = {p:.4f} -> {'SIGNIFICATIVO' if p < 0.05 else 'No significativo'}\n")
+            chi2_p_values[var] = p
+            
+        plot_pvalues(chi2_p_values, 'Valores p (Chi-Cuadrado) - Componente Categórico / Espacio-Temporal', 'pvalues_chisquare.png')
 
 if __name__ == "__main__":
     run_tests()

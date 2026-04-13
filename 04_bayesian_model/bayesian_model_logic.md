@@ -27,17 +27,30 @@ $$L(y, z | \beta, \alpha) = \prod_{i=1}^N \underbrace{P(z_i | \beta)}_{\text{Ocu
 - **Ocupación**: $z_i \sim \text{Bernoulli}(\text{logit}^{-1}(X_i\beta))$. Si el sitio está contaminado, $\psi_i$ baja.
 - **Detección**: $y_{i,j} \sim \text{Bernoulli}(z_i \cdot \text{logit}^{-1}(W_{i,j}\alpha))$. Si no hay ave ($z_i=0$), no detectamos nada.
 
-### Paso 2: Definir las Priors (Informativas vs No Informativas)
-Para cada coeficiente de nuestras regresiones, asignamos una distribución previa. 
+### Paso 2: Especificación de las Priors (No Informativas / Débilmente Informativas)
+Para cada coeficiente de nuestras regresiones, asignaremos una distribución previa, asumiendo ignorancia pero permitiendo que el muestreo converja y deje a los datos regir.
 
-$$P(\beta, \alpha) = P(\beta) \cdot P(\alpha)$$
+**1. Estructura y Variables Específicas:**
+Según nuestro análisis previo de datos (EDA), los hiperparámetros se configuran sobre dos componentes aislados:
+- **Ecuación de Ocupación Ecológica ($\psi$):** Estructurada por $\beta_0$ (Intercepto base), $\beta_{PM10}$ (Efecto del PM$_{10}$) y $\beta_{O3}$ (Efecto del Ozono).
+- **Ecuación de Detección/Esfuerzo ($p$):** Estructurada por $\alpha_0$ (Intercepto base), $\alpha_{duracion}$ (Tiempo de búsqueda en minutos), $\alpha_{estacion}$ (Heterogeneidad geográfica) y $\alpha_{protocolo}$.
 
-Comúnmente se usan **Normales Multivariadas**:
-$$\beta \sim \text{MVN}(\mu_\beta, \Sigma_\beta)$$
-$$\alpha \sim \text{MVN}(\mu_\alpha, \Sigma_\alpha)$$
+**2. Distribuciones a Priori:**
+Para acoplarse eficientemente al aumento de variables de Pólya-Gamma y la función probabilística logística (Logit), todas nuestras pre-creencias sobre los coeficientes se modelarán usando \textbf{Distribuciones Normales (Gaussianas)}.
+$$ \beta \sim \text{Normal}(\mu_\beta, \Sigma_\beta) $$
+$$ \alpha \sim \text{Normal}(\mu_\alpha, \Sigma_\alpha) $$
 
-- Si pones una varianza ($\Sigma$) muy grande, la prior es "plana" y dejas que los datos decidan.
-- El modelo de **Clark (2019)** usa estas priors para estructurar los efectos de los contaminantes.
+**3. Hiperparámetros Designados:**
+Bajo la estadística Bayesiana contemporánea, y como garantía para prevenir problemas numéricos letales dentro de la transformación de probabilidades (Logit), se establece el bloque iterativo bajo los siguientes parámetros uniformes para todos los $\beta$ y $\alpha$:
+- **Media ($\mu$):** $0$
+- **Desviación Estándar ($\sigma$):** $1.5$ (Equivalente en matriz de varianza $\Sigma$ a $2.25$)
+
+El estado inicial base para toda variable es $\theta_{inicial} \sim \text{Normal}(0, 1.5)$.
+*(Nota matemática: Tradicionalmente una varianza inmensa ($\sigma=1000$) se vendía como "no informativa". Sin embargo, sobre funciones Logit, empuja falsamente los pesos hacia topes extremos ($0$ y $1$). Un $\sigma=1.5$ aplana completamente la probabilidad real en la campana permitiendo verdadera imparcialidad).*
+
+**4. Argumento detrás de cada Prior:**
+- **Escepticismo y Media Cero $\mu=0$:** Significa que el algoritmo arranca asumiendo categóricamente que ni el polvo ni los gases tienen efecto sobre el Copetón. Si la muestra termina siendo negativa no será por sesgo preconcebido, sino porque la avalancha colosal de los avistamientos empujó de facto el modelo en esa dirección.
+- **Amplitud Flexible ($\sigma=1.5$):** Ofrece libertad maleable a tu esquema paramétrico para aislar sin trabas y "absorber" toda la inmensa cantidad de falso-ruido proveniente de las horas invertidas y la geolocalización de las aceras de monitoreo antes de juzgar la polución pura.
 
 ### Paso 3: Combinar Likelihood y Prior para la Posterior
 Multiplicamos ambos componentes. La distribución posterior conjunta es:

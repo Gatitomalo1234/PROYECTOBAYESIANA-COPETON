@@ -8,31 +8,38 @@ DATA_FILE = os.path.join(BASE_DIR, 'data', 'processed', 'copeton_occupancy_ready
 PLOT_DIR = os.path.join(BASE_DIR, '03_eda_copeton', 'plots')
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-def plot_densities():
+def plot_all_densities():
     df = pd.read_csv(DATA_FILE)
     
-    # Set up the matplotlib figure
-    f, axes = plt.subplots(1, 3, figsize=(15, 5))
-    f.suptitle('Histogramas y Curvas de Densidad (KDE) - Variables Seleccionadas', fontsize=16)
-
-    # Plot PM10
-    sns.histplot(df['pm10_ugm3'].dropna(), kde=True, color="skyblue", ax=axes[0], stat="density")
-    axes[0].set_title('Material Particulado (PM10)')
-    axes[0].set_xlabel('PM10 (µg/m³)')
+    # Lista de todas las variables
+    variables = [
+        'pm10_ugm3', 'pm25_ugm3', 'co_ppm', 'no2_ppb', 
+        'o3_ppb', 'so2_ugm3', 'DURATION MINUTES', 'EFFORT DISTANCE KM'
+    ]
     
-    # Plot O3
-    sns.histplot(df['o3_ppb'].dropna(), kde=True, color="olive", ax=axes[1], stat="density")
-    axes[1].set_title('Ozono (O3)')
-    axes[1].set_xlabel('O3 (ppb)')
+    titles = [
+        'PM10 (µg/m³)', 'PM2.5 (µg/m³)', 'CO (ppm)', 'NO2 (ppb)',
+        'O3 (ppb)', 'SO2 (µg/m³)', 'Minutos de Muestreo', 'Distancia Caminada (Km)'
+    ]
     
-    # Plot DURATION MINUTES
-    sns.histplot(df['DURATION MINUTES'].dropna(), kde=True, color="gold", ax=axes[2], stat="density")
-    axes[2].set_title('Esfuerzo: Duración Muestreo')
-    axes[2].set_xlabel('Minutos')
+    colors = ['skyblue', 'salmon', 'lightgreen', 'orange', 'purple', 'gray', 'gold', 'teal']
     
+    f, axes = plt.subplots(2, 4, figsize=(20, 10))
+    f.suptitle('Histogramas y Curvas de Densidad (KDE) - Análisis Exploratorio Completo', fontsize=20, y=1.02)
+    
+    axes = axes.flatten()
+    
+    for i, var in enumerate(variables):
+        data = df[var].dropna()
+        if len(data) > 0:
+            sns.histplot(data, kde=True, color=colors[i], ax=axes[i], stat="density")
+        axes[i].set_title(titles[i])
+        axes[i].set_xlabel('')
+        axes[i].set_ylabel('Densidad')
+        
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOT_DIR, 'density_plots.png'))
+    plt.savefig(os.path.join(PLOT_DIR, 'density_plots_all.png'), bbox_inches='tight')
     plt.close()
 
 if __name__ == "__main__":
-    plot_densities()
+    plot_all_densities()

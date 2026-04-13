@@ -76,7 +76,7 @@ Para superar el análisis meramente visual, se ejecutaron pruebas matemáticas d
 ### 1. Variables Ambientales (Prueba U de Mann-Whitney)
 Al cruzar la totalidad de las variables ambientales frente al vector de Detección ($y=0$ o $y=1$), los resultados frecuentistas arrojaron el siguiente panorama general:
 
-![Resultados Valores P Contaminación](plots/pvalues_mannwhitney.png)
+![Resultados Valores P Contaminación](plots/pvalues_mannwhitney_bio.png)
 
 - **$PM_{10}$:** $p=0.1088$ (No significativo)
 - **$PM_{2.5}$:** $p=0.6913$ (No significativo)
@@ -107,11 +107,16 @@ La respuesta justifica la existencia misma del modelo Bayesiano:
 Evaluamos las variables del "Esfuerzo de Muestreo", revelando el componente que unifica este análisis. 
 
 **Pruebas Numéricas (Mann-Whitney U):**
+
+![Resultados Valores P Esfuerzo](plots/pvalues_mannwhitney_method.png)
+
 - **Duración del Muestreo (`DURATION MINUTES`):** $p < 0.0001$ **(¡Altamente Significativo!)**
 - **Distancia Recorrida (`EFFORT DISTANCE KM`):** $p = 0.9699$ (No significativo)
 - **Número de Observadores (`NUMBER OBSERVERS`):** $p=0.1124$ (No significativo)
 
 **Pruebas Cualitativas (Chi-Cuadrado de Pearson):**
+
+![Resultados Valores P Categóricos](plots/pvalues_chisquare.png)
 - **Tipo de Protocolo (`PROTOCOL NAME`):** $p < 0.0001$ **(¡Altamente Significativo!)**
 - **Estación Meteorológica (`nearest_station`):** $p < 0.0001$ **(¡Altamente Significativo!)**
 - **Estacionalidad (`month`):**  $p=0.0156$ **(Significativo)**

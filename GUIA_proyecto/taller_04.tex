@@ -8,6 +8,7 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{graphicx}
+\usepackage{float}
 
 \geometry{margin=1in}
 
@@ -119,46 +120,103 @@ Para que cualquier persona pueda replicar exactamente este trabajo desde cero, l
 \end{enumerate}
 \section{Parte 3 --- Análisis Exploratorio de Datos (EDA)}
 
-Esta sección detalla los descubrimientos estadísticos paramétricos y distribucionales tras cruzar el historial de aves de eBird con las mediciones de la Red de Monitoreo de Calidad del Aire de Bogotá (RMCAB).
+Esta sección detalla el comportamiento estadístico y distribucional de las base de datos combinada (eBird y RMCAB).
 
-\subsection*{1. Resumen Estadístico e Imputación de Nulos}
-Nuestra primera directriz metodológica abordó la inspección de la pureza de los datos. Evidenciamos una asimetría instrumental profunda: el Material Particulado ($PM_{10}$) tiene un $98.2\%$ de completitud en sus lecturas históricas. Por el contrario, los gases como el Dióxido de Nitrógeno ($NO_2$) sufrieron pérdidas severas con casi un $40\%$ de datos nulos en todas las estaciones.\\
-\textit{Decisión Bayesiana:} Se descartó por completo el uso del $NO_2$ en el modelo numérico. Aplicar matemáticas de imputación sobre una base con $40\%$ de vacíos inyectaría falsa certeza al algoritmo, destruyendo la varianza del \textit{Prior} Bayesiano y arrojando una convergencia espuria.
+\subsection*{1. Resumen de Estadísticas e Imputación de Nulos}
 
-\subsection*{2. Distribución y Ajuste: Histogramas y Gráficos de Densidad}
-Para determinar el comportamiento probabilístico de nuestras variables paramétricas candidatas ($PM_{10}$, Ozono $O_3$ y Esfuerzo de Muestreo), se aplicaron curvas de Estimación de Densidad Kernel (KDE).
+\textbf{Diccionario de Variables:}\\
+El dataset consolidado (\texttt{copeton\_occupancy\_ready.csv}) cuenta con 910 unidades de muestreo compuestas por las siguientes variables predictoras:
+\begin{itemize}
+    \item \textbf{Variable Respuesta (Latente):} \textit{y\_copeton} (1/0 Detección positiva de la especie).
+    \item \textbf{Variables Ambientales (RMCAB):} \textit{pm10\_ugm3} ($\mu g/m^3$), \textit{pm25\_ugm3} ($\mu g/m^3$), \textit{co\_ppm} (Concentración CO), \textit{no2\_ppb} (Concentración $NO_2$), \textit{o3\_ppb} (Ozono), \textit{so2\_ugm3} (Dióxido de Azufre).
+    \item \textbf{Variables de Detección Densa (eBird):} \textit{DURATION MINUTES} (Esfuerzo temporal invertido), \textit{EFFORT DISTANCE KM} (Distancia caminada), \textit{NUMBER OBSERVERS} (Tamaño del grupo pajarero), \textit{PROTOCOL NAME} (Traveling vs Stationary).
+    \item \textbf{Variables Espacio-Temporales:} \textit{nearest\_station} (Estación climatológica cruzada geométricamente), \textit{month} (Control de estacionalidad mensual).
+\end{itemize}
 
-\begin{figure}[h!]
+\vspace{0.3cm}
+\textbf{Completitud e Imputación:}\\
+Un paso fundamental antes del modelado fue analizar la pureza de los datos recopilados por las 14 estaciones de Bogotá (2021-2026). Al cruzar los registros aviares con las mediciones atmosféricas, descubrimos una discrepancia instrumental significativa:
+\begin{itemize}
+    \item \textbf{Alta Completitud:} El Material Particulado ($PM_{10}$ y $PM_{2.5}$) gozan de una completitud excelente con solo $1.76\%$ y $0.55\%$ de nulos, respectivamente.
+    \item \textbf{Déficit Severo:} Los gases como el Dióxido de Nitrógeno ($NO_2$) y el Monóxido de Carbono ($CO$) sufrieron ausencias extremas, bordeando casi un $40\%$ y $46\%$ de nulos espaciales. El Ozono ($O_3$) mantuvo un nivel moderado ($12\%$ de nulos).
+\end{itemize}
+Basado en estos descriptivos genéricos, determinamos que era estocásticamente inviable basar un modelo en variables gaseosas como el $NO_2$. Rellenar de forma adivinatoria casi el $40\%$ de una variable alteraría severamente las conclusiones poblacionales arrojando varianzas artificialmente compactas. 
+
+\subsection*{2. Gráficos de Análisis Exploratorio: Histogramas y Densidad}
+A continuación, se presentan las curvas de probabilidad (Kernel Density Estimation - KDE) cruzadas con el histograma para el inventario completo de predictores, abarcando tanto contaminantes gaseosos como el esfuerzo metodológico del investigador.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=1\textwidth]{../03_eda_copeton/plots/density_plots.png}
-    \caption{Curvas de densidad para predictores seleccionados. Evidencian una extrema asimetría de cola derecha, rechazando la asunción de Normalidad de Gauss.}
-    \label{fig:kde}
+    \includegraphics[width=1\textwidth]{plots/density_plots_all.png}
+    \caption{Curvas de densidad para el espectro completo de las covariables (Gases, Partículas y Esfuerzo de Muestreo).}
+    \label{fig:kde_all}
 \end{figure}
 
-El hallazgo central derivado de la Figura \ref{fig:kde} consiste en el fuerte sesgo de las covariables hacia la derecha (valores bajos concentrados con "outliers" reales de eventos como incendios forestales). Esta ausencia de normalidad estricta nos obligó metodológicamente a rechazar modelos paramétricos lineales rígidos (como un T-Test) y utilizar inferencia no-paramétrica para los cruces probabilísticos y justificar el logit Bayesiano.
+Al analizar la Figura \ref{fig:kde_all}, es claramente visible que ninguna de estas variables sigue la famosa Campana de Gauss perfectamente simétrica. Por el contrario, muestran un sesgo hacia la izquierda, estirando una larga cola de datos hacia la derecha. \\
+Esto tiene todo el sentido ecológico: en Bogotá la mayoría de los días presentan una aglomeración de mediciones estables y bajas de polución, con esporádicos eventos anómalos (como picos industriales o incendios) graficados en los extremos derechos. Matemáticamente, constatar esta irregularidad nos exige descartar pruebas asimiladas a modelos asintóticos y nos justifica plenamente el uso de métodos probabilísticos más robustos capaces de dominar el ruido y trabajar con distribuciones inclinadas.
 
-\subsection*{3. Matriz de Correlaciones Gráfica}
-Al no cumplir con los preceptos de campana de Gauss, se aplicó una matriz de covarianza evaluada bajo los coeficientes de Spearman ($\rho$) y no de Pearson.
+\subsection*{3. Matriz de Correlaciones de las Variables}
+Debido a la ausencia de normalidad evidenciada en los gráficos previos, se generó una matriz de rango de Spearman ($\rho$) abarcando todos los vectores para sondear posibles colinealidades.
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.7\textwidth]{../03_eda_copeton/plots/correlation_matrix.png}
+    \includegraphics[width=0.7\textwidth]{plots/correlation_matrix.png}
     \caption{Matriz de Correlación de rangos de Spearman ($\rho$).}
     \label{fig:corrmatrix}
 \end{figure}
 
-Según se expone en la Figura \ref{fig:corrmatrix}, capturamos un caso ejemplar de \textbf{Multicolinealidad Perfecta} entre el $PM_{10}$ y el $PM_{2.5}$ reportando una correlación de $\rho = 0.77$. Colocar ambas variables concurrentemente en la Cadena de Montecarlo estropearía la probabilidad identificable porque el algoritmo fallará distinguiendo cuál de las dos partículas ejerce peso. Por lo tanto, conservaremos rígidamente solo al $PM_{10}$, por su afinidad técnica a decantar en el micro-hábitat de baja altura del Copetón.
+El diagnóstico principal que arroja la matriz es la absoluta independencia cruzada de la mayoría de gases y tiempos de muestreo. Sin embargo, sobresale ineludiblemente una \textbf{Multicolinealidad Fuerte} ($\rho = 0.77$) entre el $PM_{10}$ y el $PM_{2.5}$. En consecuencia a este hallazgo paramétrico, dictaminamos seleccionar como variable primaria únicamente al $PM_{10}$, dado que engloba un polvo suspendido a niveles de arbusto rastrojero bajo, capturando con mayor fidelidad las perturbaciones del estrato del Copetón, a diferencia de los gases de alta suspensión.
 
-\subsection*{4. Pruebas de Hipótesis y Paradoja del Sesgo Humano}
-Finalmente, se aplicó una prueba U de Mann-Whitney cruzando todas las variables ambientales en función de la Detección simple (si el ave fue reportada).
+\subsection*{4. Pruebas de Hipótesis (Por qué la estadística básica falla)}
+Aplicamos una prueba matemática (Mann-Whitney) separando el análisis en dos bloques estratégicos: el biológico (el efecto ambiental puro) y el metodológico (el esfuerzo humano subyacente).
 
-\begin{figure}[h!]
+\begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\textwidth]{../03_eda_copeton/plots/pvalues_mannwhitney.png}
-    \caption{Gráfico de valores-P resultantes tras aplicar una prueba Mann-Whitney.}
-    \label{fig:pvalues}
+    \includegraphics[width=0.8\textwidth]{plots/pvalues_mannwhitney_bio.png}
+    \caption{Valores-P para el Componente Biológico de Contaminantes.}
+    \label{fig:pvalues_bio}
 \end{figure}
 
-La Figura \ref{fig:pvalues} resume categóricamente la esencia de nuestro proyecto: variables puramente humanas como los \textit{minutos observando} lograron estallar la significancia ($p < 0.0001$), demostrando que el "ruido visual del humano" oscurece temporalmente a un gran contaminante como el $PM_{10}$ induciéndolo a falsos negativos no significativos. Gracias a estos gráficos decidimos oficialmente incorporar al humano dentro de la red probabilística de detección ($p$) para despejar el camino matemático que finalmente revelará el impacto neto de la dupla $PM_{10}$ y $O_3$ sobre la ocupación animal latente ($\psi$).
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/pvalues_mannwhitney_method.png}
+    \caption{Valores-P para el Componente Metodológico de Esfuerzo Humano.}
+    \label{fig:pvalues_method}
+\end{figure}
+
+Los resultados en cadena revelan algo sumamente interesante. A simple vista, si solo miramos la Figura \ref{fig:pvalues_bio}, partículas agresivas como el material particulado ($PM_{10}$) parecen fallar la prueba, dando la aparente conclusión falsa de que no tienen importancia en el ecosistema. Sin embargo, al observar el componente humano (Figura \ref{fig:pvalues_method}), las horas invertidas por el observador rompen absolutamente la prueba marcando una importancia monstruosa ($p < 0.0001$). Curiosamente, la distancia física caminada resultó ser estadísticamente irrelevante ($p=0.96$). Esto tiene todo el sentido en ornitología: para detectar a este pequeño pájaro rastrojero importa muchísimo más la paciencia de "cuánto tiempo te quedas observando un punto", que el puro esfuerzo físico de "cuántos kilómetros caminas rápido".
+
+Finalmente, evaluamos el componente categórico del espacio físico y la temporalidad mediante una prueba de \textbf{Chi-Cuadrado de Pearson} ($\chi^2$).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/pvalues_chisquare.png}
+    \caption{Valores-P de Chi-Cuadrado para Variables Cualitativas y Geográficas.}
+    \label{fig:pvalues_chi2}
+\end{figure}
+
+El resultado de la Figura \ref{fig:pvalues_chi2} es rotundo: la Estación meteorológica más cercana a la observación arroja un valor colosal ($p<0.0001$). Esto certifica probabilísticamente que censar al lado del humedal de Kennedy te dará posibilidades ecológicas radicalmente opuestas a censar parado en una acera industrial, lo que nos obliga formalmente a usar la ubicación como control en nuestro modelo iterativo probabilístico.
+
+\vspace{0.5cm}
+\subsection*{Conclusión Final del EDA}
+Culminada la exploración visual y probabilística de la base de datos, el diseño del inminente Modelo Bayesiano exigirá la siguiente arquitectura predictora, sustentada estrictamente en nuestro filtraje matemático:
+
+\textbf{Lo que descartamos:}
+\begin{itemize}
+    \item \textbf{Gases ($NO_2$, $SO_2$, $CO$):} Descartados para no inducir falsas certezas en el algoritmo probabilístico, dado el alto déficit de sus mediciones ($\sim 40\%$ de vacíos de información).
+    \item \textbf{Material Particulado Fino ($PM_{2.5}$):} Sacrificado al comprobarse como una variable redundante y clonada frente a la dispersión de partículas gruesas (Correlación de Spearman de $0.77$ frente al $PM_{10}$).
+\end{itemize}
+
+\textbf{Factores Biológicos de Ocupación:}
+\begin{itemize}
+    \item \textbf{Material Particulado Grueso ($PM_{10}$):} Seleccionado por idoneidad ecosistémica. Representa el polvo pesado decantado sobre el césped, modelando con fidelidad la disrupción en el estrato bajo de forrajeo del ave.
+    \item \textbf{Ozono ($O_3$):} Integrado a la ecuación biológica tras ser el único gas capaz de probar un estrés estadísticamente significativo sobre nuestra población ($p < 0.05$).
+\end{itemize}
+
+\textbf{Componentes de Esfuerzo Muestral:}
+\begin{itemize}
+    \item \textbf{Minutos de Duración:} Anclado al modelo obligatoriamente ($p < 0.0001$). Al seleccionarlo descartamos definitivamente a la Distancia Caminada ($p=0.96$), garantizando que el éxito de reportar a esta ave dependió del tiempo invertido y no de los kilómetros recorridos.
+    \item \textbf{Estación y Protocolo:} Factores geográficos y metodológicos adheridos de forma obligatoria tras sus colosales pruebas de Chi-Cuadrado ($p < 0.0001$), neutralizando así el grave sesgo visual humano que destrozaría cualquier modelo básico.
+\end{itemize}
 
 \end{document}
