@@ -1,0 +1,21 @@
+=== PRUEBAS DE SIGNIFICANCIA ESTADÍSTICA ===
+H0: No hay diferencia entre los grupos de Detección (y=0 vs y=1)
+H1: Hay diferencia estadística significativa (p < 0.05)
+
+--- VARIABLES AMBIENTALES (Mann-Whitney U) ---
+pm10_ugm3: p-value = 0.1088 -> No significativo
+pm25_ugm3: p-value = 0.6913 -> No significativo
+co_ppm: p-value = 0.9377 -> No significativo
+no2_ppb: p-value = 0.0295 -> SIGNIFICATIVO
+o3_ppb: p-value = 0.0437 -> SIGNIFICATIVO
+so2_ugm3: p-value = 0.6757 -> No significativo
+
+--- VARIABLES DE ESFUERZO HUMANO (Mann-Whitney U) ---
+DURATION MINUTES: p-value = 0.0000 -> SIGNIFICATIVO
+EFFORT DISTANCE KM: p-value = 0.9699 -> No significativo
+NUMBER OBSERVERS: p-value = 0.1124 -> No significativo
+
+--- VARIABLES CATEGÓRICAS vs y_copeton (Chi-Cuadrado) ---
+PROTOCOL NAME: p-value = 0.0000 -> SIGNIFICATIVO
+month: p-value = 0.0156 -> SIGNIFICATIVO
+nearest_station: p-value = 0.0000 -> SIGNIFICATIVO

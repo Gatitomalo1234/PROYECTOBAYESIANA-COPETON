@@ -17,14 +17,15 @@ Este proyecto tiene como objetivo estimar la probabilidad de ocupación y detecc
   - `prepare_occupancy_data.py`: Prepara la matriz de historial de detección.
   - `cross_join_birds_pollution.py`: Script de cruce espacial y temporal.
   - `fetch_bogota_pollution_hourly.py`: Descarga de datos de OpenAQ.
-- 📂 `eda_copeton/`: Análisis Específico para el modelo del Copetón.
-  - `copeton_report.md`: Hallazgos sobre el dataset final (910 listas).
-  - `plots/`: Visualizaciones de balance de clases y por estación.
-- 📂 `Documentos_Apoyo_Markdown/`: Informes técnicos y notas.
-  - `bayesian_model_logic.md`: Explicación matemática del modelo.
-  - `data_pipeline_logic.md`: Lógica del cruce de bases.
+- 📂 `03_eda_copeton/`: Análisis Específico para el modelo del Copetón.
+  - `copeton_report.md`: Hallazgos biológicos, paradoja del Copetón y multicolinealidad.
+  - `perform_eda.py`: Script generador de los estadísticos y gráficas.
+  - `plots/`: Visualizaciones de balance de clases, cajas y matrices de correlación.
+- 📂 `04_bayesian_model/`: Carpeta del modelado estadístico.
+  - `bayesian_model_logic.md`: Explicación matemática y teórica del modelo.
+- 📂 `Documentos_Apoyo_Markdown/`: Notas técnicas secundarias.
+  - `data_pipeline_logic.md`: Lógica heredada del cruce de bases.
   - `next_steps.md`: Notas de avance iterativo.
-  - `copeton_report.md`: Copia de los hallazgos de métricas Bayesianas.
 - 📂 `GUIA_proyecto/PDFs/`: Carpeta centralizada que consolida todos los formatos .pdf de literatura y guías (como Clark 2019).
 
 ## Proceso de Destilación de Datos (Control de Calidad)

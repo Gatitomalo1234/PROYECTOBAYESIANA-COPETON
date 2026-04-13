@@ -7,6 +7,7 @@
 \usepackage{geometry}
 \usepackage{hyperref}
 \usepackage{enumitem}
+\usepackage{graphicx}
 
 \geometry{margin=1in}
 
@@ -116,5 +117,48 @@ Para que cualquier persona pueda replicar exactamente este trabajo desde cero, l
     \item \textbf{Filtro biológico y limpieza:} De todo el universo de datos cruzados, se eliminan las listas pobres y nos quedamos exclusivamente con las "listas completas" de eBird. Esto es vital para asegurar que la no-detección de un copetón sea matemáticamente una ausencia real y no un error humano. Además, se controlan estadísticamente variables como la distancia recorrida o el tiempo invertido buscando.
     \item \textbf{Modelado Bayesiano:} Finalmente, la base de datos consolidada se ingresa al algoritmo. Se ejecuta una regresión logística bayesiana para calcular si las curvas de material particulado y gases alteran la ocurrencia del copetón, permitiendo que el modelo capture toda la incertidumbre en sus distribuciones posteriores.
 \end{enumerate}
+\section{Parte 3 --- Análisis Exploratorio de Datos (EDA)}
+
+Esta sección detalla los descubrimientos estadísticos paramétricos y distribucionales tras cruzar el historial de aves de eBird con las mediciones de la Red de Monitoreo de Calidad del Aire de Bogotá (RMCAB).
+
+\subsection*{1. Resumen Estadístico e Imputación de Nulos}
+Nuestra primera directriz metodológica abordó la inspección de la pureza de los datos. Evidenciamos una asimetría instrumental profunda: el Material Particulado ($PM_{10}$) tiene un $98.2\%$ de completitud en sus lecturas históricas. Por el contrario, los gases como el Dióxido de Nitrógeno ($NO_2$) sufrieron pérdidas severas con casi un $40\%$ de datos nulos en todas las estaciones.\\
+\textit{Decisión Bayesiana:} Se descartó por completo el uso del $NO_2$ en el modelo numérico. Aplicar matemáticas de imputación sobre una base con $40\%$ de vacíos inyectaría falsa certeza al algoritmo, destruyendo la varianza del \textit{Prior} Bayesiano y arrojando una convergencia espuria.
+
+\subsection*{2. Distribución y Ajuste: Histogramas y Gráficos de Densidad}
+Para determinar el comportamiento probabilístico de nuestras variables paramétricas candidatas ($PM_{10}$, Ozono $O_3$ y Esfuerzo de Muestreo), se aplicaron curvas de Estimación de Densidad Kernel (KDE).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\textwidth]{../03_eda_copeton/plots/density_plots.png}
+    \caption{Curvas de densidad para predictores seleccionados. Evidencian una extrema asimetría de cola derecha, rechazando la asunción de Normalidad de Gauss.}
+    \label{fig:kde}
+\end{figure}
+
+El hallazgo central derivado de la Figura \ref{fig:kde} consiste en el fuerte sesgo de las covariables hacia la derecha (valores bajos concentrados con "outliers" reales de eventos como incendios forestales). Esta ausencia de normalidad estricta nos obligó metodológicamente a rechazar modelos paramétricos lineales rígidos (como un T-Test) y utilizar inferencia no-paramétrica para los cruces probabilísticos y justificar el logit Bayesiano.
+
+\subsection*{3. Matriz de Correlaciones Gráfica}
+Al no cumplir con los preceptos de campana de Gauss, se aplicó una matriz de covarianza evaluada bajo los coeficientes de Spearman ($\rho$) y no de Pearson.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.7\textwidth]{../03_eda_copeton/plots/correlation_matrix.png}
+    \caption{Matriz de Correlación de rangos de Spearman ($\rho$).}
+    \label{fig:corrmatrix}
+\end{figure}
+
+Según se expone en la Figura \ref{fig:corrmatrix}, capturamos un caso ejemplar de \textbf{Multicolinealidad Perfecta} entre el $PM_{10}$ y el $PM_{2.5}$ reportando una correlación de $\rho = 0.77$. Colocar ambas variables concurrentemente en la Cadena de Montecarlo estropearía la probabilidad identificable porque el algoritmo fallará distinguiendo cuál de las dos partículas ejerce peso. Por lo tanto, conservaremos rígidamente solo al $PM_{10}$, por su afinidad técnica a decantar en el micro-hábitat de baja altura del Copetón.
+
+\subsection*{4. Pruebas de Hipótesis y Paradoja del Sesgo Humano}
+Finalmente, se aplicó una prueba U de Mann-Whitney cruzando todas las variables ambientales en función de la Detección simple (si el ave fue reportada).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{../03_eda_copeton/plots/pvalues_mannwhitney.png}
+    \caption{Gráfico de valores-P resultantes tras aplicar una prueba Mann-Whitney.}
+    \label{fig:pvalues}
+\end{figure}
+
+La Figura \ref{fig:pvalues} resume categóricamente la esencia de nuestro proyecto: variables puramente humanas como los \textit{minutos observando} lograron estallar la significancia ($p < 0.0001$), demostrando que el "ruido visual del humano" oscurece temporalmente a un gran contaminante como el $PM_{10}$ induciéndolo a falsos negativos no significativos. Gracias a estos gráficos decidimos oficialmente incorporar al humano dentro de la red probabilística de detección ($p$) para despejar el camino matemático que finalmente revelará el impacto neto de la dupla $PM_{10}$ y $O_3$ sobre la ocupación animal latente ($\psi$).
 
 \end{document}
