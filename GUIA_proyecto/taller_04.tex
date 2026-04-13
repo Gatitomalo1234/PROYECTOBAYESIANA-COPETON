@@ -1,0 +1,120 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\geometry{margin=1in}
+
+\title{Diseño Metodológico: Impacto de la Contaminación en la Avifauna Urbana}
+\author{Nicolas Cardenas, Miguel Camargo, Camilo Hernandez}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Parte 1 --- Primera Entrega: Pensamiento Crítico}
+
+\subsection*{Análisis Bibliográfico}
+
+\textbf{1. Enunciar el algoritmo de búsqueda en Web of Science (WOS)}
+
+Para capturar la intersección de modelos probabilísticos, ecología urbana y calidad del aire en la base de datos de Web of Science (WOS), el algoritmo (cadena de búsqueda booleana) utilizado es:
+\begin{verbatim}
+TS=(("occupancy model*" OR "Bayesian occupancy" OR "hierarchical model*") 
+AND ("bird*" OR "avian" OR "Zonotrichia capensis") 
+AND ("air pollution" OR "particulate matter" OR "urban noise" OR "urbanization"))
+\end{verbatim}
+\textit{Filtros aplicados}: Documentos de los últimos 15 años (2009-2024), categorías de ``Ecology'', ``Environmental Sciences'', y ``Ornithology''.
+
+\vspace{0.5cm}
+\textbf{2. Análisis Bibliométrico}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Keywords (Palabras Clave):} Las palabras más recurrentes en la literatura extraída conforman tres clústeres: (1) \textit{Imperfect detection}, \textit{Hierarchical modeling}, \textit{Bayesian inference}; (2) \textit{Urban ecology}, \textit{Anthropogenic noise}, \textit{Air quality}; (3) \textit{Avian community}, \textit{Neotropical birds}.
+    \item \textbf{Autores Destacados:} Destacan autores metodológicos como J.A. Royle y D.I. MacKenzie (pioneros en Occupancy Models). En el nicho de impactos urbanos en aves neotropicales y ruido, I. MacGregor-Fors y C.P. Silva. En metodologías computacionales (Logit Link Bayesian), D.S. Johnson y J.S. Clark.
+    \item \textbf{Universidades e Instituciones:} Cornell University (Cornell Lab of Ornithology debido al uso de eBird), Universidad Nacional Autónoma de México (UNAM), University of Washington, y centros como USGS Patuxent Wildlife Research Center.
+\end{itemize}
+
+\subsection*{Identificación de Bibliografía Clave: Resumen de 5 Artículos}
+
+\textbf{1. Ortega-Álvarez, R., \& MacGregor-Fors, I. (2011). \textit{Effects of traffic noise on occupancy patterns of forest birds.}}
+\begin{itemize}[leftmargin=0.5cm]
+    \item \textbf{Objetivo:} Evaluar cómo el ruido del tráfico altera la probabilidad de ocupación de las especies de aves en un ecosistema urbano.
+    \item \textbf{Temática Teórica:} Ecología urbana; contaminación acústica como filtro ambiental; modelos de ocupación.
+    \item \textbf{Metodología:} Muestreo de puntos de conteo repetidos utilizando covariables de detección (tiempo del día) y ambientales en una matriz de historial ($1/0$).
+    \item \textbf{Resultados:} El ruido reduce drásticamente la ocupación, demostrando que la contaminación empuja a las poblaciones a excluirse funcionalmente del hábitat.
+\end{itemize}
+
+\textbf{2. Silva, C. P., et al. (2022). \textit{Urban noise and surrounding city morphology influence green space occupancy by native birds...}}
+\begin{itemize}[leftmargin=0.5cm]
+    \item \textbf{Objetivo:} Establecer el rol del paisaje y la perturbación en la ocupación de aves nativas.
+    \item \textbf{Temática Teórica:} Respuestas funcionales de aves neotropicales y efectos de borde antrópicos.
+    \item \textbf{Metodología:} Modelado jerárquico de ocupación que separa la probabilidad de detección real de la usencia utilizando variables métricas urbanas y datos acústicos.
+    \item \textbf{Resultados:} Factores de estrés urbano como barreras de polución y ruido disminuyen la permanencia de especies en áreas urbanas.
+\end{itemize}
+
+\textbf{3. Johnson, D. S., et al. (2013). \textit{Efficient Bayesian analysis of occupancy models with logit link functions.}}
+\begin{itemize}[leftmargin=0.5cm]
+    \item \textbf{Objetivo:} Formular una metodología computacional iterativa rápida (Gibbs Sampling) para modelos de ocupación logísticos a través de variables latentes.
+    \item \textbf{Temática Teórica:} Estadística Bayesiana, MCMC, variables de Pólya-Gamma.
+    \item \textbf{Metodología:} Conversión de la distribución de verosimilitud Bernoulli/Logit a aproximaciones condicionales normales gaussianas para inferencia analítica.
+    \item \textbf{Resultados:} Implementación que agiliza exponencialmente el ajuste de modelos complejos sobre datasets masivos.
+\end{itemize}
+
+\textbf{4. Dugger, K. M., et al. (2021). \textit{Wildfire smoke affects detection of birds in Washington State.}}
+\begin{itemize}[leftmargin=0.5cm]
+    \item \textbf{Objetivo:} Investigar si la extrema contaminación por aerosol altera la probabilidad de detección ($p$) frente a la de ocupación ($\psi$).
+    \item \textbf{Temática Teórica:} Interrelación material particulado ($\text{PM}_{2.5}$) y comportamiento animal aviar.
+    \item \textbf{Metodología:} Cruce espacial de datos de biomonitoreo con concentración atmosférica satelital y modelos Bayesianos.
+    \item \textbf{Resultados:} La contaminación suprime primero el canto y actividad biológica (afectando la detección matemática) haciendo vital controlar los modelos por calidad del aire.
+\end{itemize}
+
+\textbf{5. Sanderfoot, O. V., et al. (2017). \textit{A review of the effects of air pollution on birds.}}
+\begin{itemize}[leftmargin=0.5cm]
+    \item \textbf{Objetivo:} Sintetizar la toxicología aviar y cómo el aparato respiratorio de las aves reacciona ante estrés químico urbano.
+    \item \textbf{Temática Teórica:} Gases pesados ($\text{SO}_2, \text{NO}_2$) y partículas en suspensión ambientales.
+    \item \textbf{Metodología:} Revisión sistemática ecofisiológica.
+    \item \textbf{Resultados:} La anatomía aviar de flujo unidireccional maximiza la absorción de toxinas, lo que vuelve a la polución gaseosa un predictor determinante de la ausencia poblacional en ciertas matrices geográficas.
+\end{itemize}
+
+
+\section{Parte 2 --- Planteamiento Metodológico}
+
+\subsection*{1. Planteamiento del problema}
+La ciudad de Bogotá enfrenta desafíos asociados a la contaminación atmosférica. Si bien sus efectos sobre la salud pública están muy documentados, existe la necesidad de evaluar de forma cuantitativa cómo esta problemática ambiental afecta a la biodiversidad urbana nativa, como el copetón (\textit{Zonotrichia capensis}). Estudiar esta relación requiere cruzar datos de plataformas de ciencia ciudadana (eBird) con registros de monitoreo ambiental (RMCAB), lidiando con la incertidumbre y la naturaleza de datos de observación que no provienen de diseños experimentales controlados.
+
+\subsection*{2. Pregunta de investigación}
+¿Cómo afectan los niveles de contaminación atmosférica urbana a la probabilidad de observar al copetón (\textit{Zonotrichia capensis}) en la ciudad de Bogotá?
+
+\subsection*{3. Justificación}
+Este proyecto se justifica empíricamente por la oportunidad de utilizar dos grandes fuentes de datos abiertos (eBird y la Red de Monitoreo de Calidad del Aire de Bogotá) para analizar el posible rol del copetón como bioindicador de la calidad ambiental urbana. Metodológicamente, el uso de una regresión logística en un marco bayesiano es pertinente ya que permite cuantificar la relación entre la presencia del ave y los contaminantes atmosféricos asumiendo de manera explícita la incertidumbre en las estimaciones a través de distribuciones posteriores.
+
+\subsection*{4. Establezca un objetivo general y específicos}
+
+\textbf{Objetivo General:}\\
+Analizar la asociación estadística entre los niveles de contaminación atmosférica urbana y la probabilidad de registrar al copetón (\textit{Zonotrichia capensis}) en Bogotá, mediante la implementación matemática de una regresión logística bayesiana.
+
+\textbf{Objetivos Específicos:}
+\begin{enumerate}
+    \item Consolidar una base de datos que integre geográficamente y espacialmente los registros de observación de aves (eBird) con las mediciones horarias de calidad del aire (RMCAB).
+    \item Estimar la probabilidad de observar al copetón analizando las covariables de material particulado ($\text{PM}_{10}, \text{PM}_{2.5}$) y gases, incluyendo variables de control sobre el esfuerzo de observación.
+    \item Cuantificar la incertidumbre de los parámetros estimados mediante la obtención de sus distribuciones posteriores.
+\end{enumerate}
+
+\subsection*{5. Paso a paso de la metodología}
+
+Para que cualquier persona pueda replicar exactamente este trabajo desde cero, la metodología sigue estos 4 pasos directos y secuenciales:
+
+\begin{enumerate}
+    \item \textbf{Obtención de bases de datos:} Primero, se extraen los registros horarios de la calidad del aire provistos por OpenAQ y la RMCAB. Para el caso de los avistamientos, es necesario realizar una solicitud formal a través de correo electrónico al portal de eBird para que aprueben la descarga de la base de datos histórica completa de la ciudad.
+    \item \textbf{Cruce espaciotemporal:} Mediante un script en Python, se une cada avistamiento de un ave con la contaminación registrada en esa misma hora. Las coordenadas del observador se emparejan con la estación de calidad del aire más cercana utilizando fórmulas geométricas de distancia.
+    \item \textbf{Filtro biológico y limpieza:} De todo el universo de datos cruzados, se eliminan las listas pobres y nos quedamos exclusivamente con las "listas completas" de eBird. Esto es vital para asegurar que la no-detección de un copetón sea matemáticamente una ausencia real y no un error humano. Además, se controlan estadísticamente variables como la distancia recorrida o el tiempo invertido buscando.
+    \item \textbf{Modelado Bayesiano:} Finalmente, la base de datos consolidada se ingresa al algoritmo. Se ejecuta una regresión logística bayesiana para calcular si las curvas de material particulado y gases alteran la ocurrencia del copetón, permitiendo que el modelo capture toda la incertidumbre en sus distribuciones posteriores.
+\end{enumerate}
+
+\end{document}

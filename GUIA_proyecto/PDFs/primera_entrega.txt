@@ -1,0 +1,95 @@
+Entrega 01 - Fundamento del proyecto
+
+Nombres: Miguel Camargo, Nicolas Cardenas, Camilo Hernandez
+
+1. Tema y delimitación inicial
+	•	Tema general: Efecto de la contaminación atmosférica urbana sobre la avifauna citadina.
+	•	Fenómeno específico:  Se busca entender la relación entre los niveles de contaminación atmosférica de Bogotá y la probabilidad de observar una especie de ave que reside en la capital, conocida comúnmente como Copetón o por su nombre científico Zonotrichia Capensis . 
+	•	Unidad de análisis: La unidad de análisis corresponde a eventos de observación de aves registrados en plataformas de ciencia ciudadana como eBIRD, donde cada registro indica si la especie determinada fue observada o no durante una salida o visita a un sitio particular. Estos eventos de observación se caracterizan por información adicional sobre el esfuerzo en campo (duración, número de observadores, distancia recorrida) y pueden vincularse con datos ambientales provenientes de la red de monitoreo de la calidad del aire de Bogotá que están disponibles a través de APIS como OpenAQ
+	•	Delimitación temporal o contextual: El estudio se limita a visitas de observación realizadas en distintos puntos de la Ciudad de Bogotá. Asimismo, el análisis se enfoca en datos contemporáneos entre 2021 y 2024 para los cuales es posible integrar los registros de observación con mediciones ambientales de contaminantes como PM2.5, PM10, NO₂, SO₂, CO y O₃. Esta delimitación permite estudiar el fenómeno dentro de un contexto actual de urbanización y presión ambiental sobre la biodiversidad.
+2. Pregunta de investigación
+¿Cómo afectan los niveles de contaminación atmosférica urbana a la probabilidad de observar al copetón (Zonotrichia Capensis)?
+En particular, se busca evaluar si incrementos en distintos contaminantes atmosféricos se asocian con cambios sistemáticos en la probabilidad de registrar la presencia de la especie en un evento de observación.
+Esta pregunta es mixta ( explicativa y predictiva). Ya que por un lado, se busca entender la relación entre contaminantes atmosféricos sobre la probabilidad de observación de la especie, lo que implica una interpretación explicativa, mas no causal, de la asociación entre las variables ambientales y la presencia de aves. Así mismo, el modelo propuesto permitirá generar estimaciones probabilísticas de presencia bajo distintos niveles de contaminación, lo que introduce un componente predictivo orientado a evaluar escenarios ambientales y posibles cambios en la probabilidad de observación.
+3. Mini-protocolo de revisión (síntesis)
+Para contextualizar el problema de investigación se realizó una revisión exploratoria de literatura sobre contaminación atmosférica y presencia de aves, con especial atención a estudios que utilizan modelos estadísticos para analizar registros de presencia-ausencia.
+PIPOC:
+	•	Población: especies de aves en entornos urbanos o periurbanos. 
+	•	Intervención / Exposición: contaminación atmosférica. 
+	•	Comparación: diferentes niveles de exposición a contaminantes atmosféricos. 
+	•	Outcome: presencia, ocupación o probabilidad de detección de aves. 
+	•	Contexto: estudios ecológicos urbanos que utilizan modelos estadísticos o probabilísticos. 
+Cadena de búsqueda
+Se utilizaron combinaciones de términos como: 
+
+“urban birds” AND “air pollution” “bird occupancy” AND “air pollution” “bird detection probability” AND “air pollution” “bayesian occupancy model birds”
+Criterios de inclusión
+	•	Estudios empíricos que analicen la relación entre variables ambientales y presencia u ocupación de aves. 
+	•	Artículos publicados en revistas científicas revisadas por pares. 
+	•	Investigaciones que utilicen modelos estadísticos para estimar probabilidades de presencia, detección u ocupación. 
+Criterios de exclusión
+	•	Estudios que no incluyan análisis cuantitativos o modelos estadísticos. 
+	•	Investigaciones centradas exclusivamente en especies no aviares. 
+	•	Artículos sin acceso al texto completo o con información metodológica insuficiente. 
+Tras aplicar estos criterios se seleccionó un conjunto reducido de cinco artículos relevantes para el análisis comparativo.
+4. Síntesis crítica de la literatura
+La literatura revisada muestra un patrón relativamente consistente en el estudio de la relación entre la contaminación atmosférica en las ciudades y la presencia de aves en entornos urbanos. En primer lugar, se observa que la mayoría de los estudios emplean modelos estadísticos como regresiones logísticas o modelos de ocupación para analizar registros de presencia–ausencia. Este tipo de modelos es apropiado cuando la variable respuesta es binaria (presencia o ausencia de la especie), ya que permite modelar la probabilidad de observar una especie en función de variables ambientales. A diferencia de las regresiones lineales, que pueden producir predicciones fuera del rango [0,1], la regresión logística utiliza una función de enlace que garantiza valores válidos para probabilidades. 
+
+En general, los estudios asumen que los datos observados poseen una distribución Bernoulli, cuya probabilidad depende de variables explicativas como niveles de contaminación atmosférica, características del hábitat o variables asociadas al esfuerzo de observación. Otro patrón recurrente en la literatura es el uso de modelos de ocupación, que separan el proceso ecológico de presencia del proceso de detección. Este enfoque permite corregir posibles sesgos derivados de la observación imperfecta de las especies, estimando simultáneamente la probabilidad de ocupación de un sitio y la probabilidad de detectar la especie durante una visita.
+
+En cuanto a las métricas utilizadas, los estudios suelen reportar coeficientes de regresión, probabilidades estimadas de ocupación o detección y medidas de ajuste del modelo. En algunos casos también se emplean métricas predictivas, como el área bajo la curva ROC o medidas de error de predicción, para evaluar la capacidad de los modelos de generalizar a nuevos datos.
+
+Otro rasgo común en la literatura es el supuesto implícito de que las variables ambientales medidas representan adecuadamente la exposición de las especies a perturbaciones urbanas. Sin embargo, en muchos casos la medición de estas variables se basa en estaciones de monitoreo relativamente distantes de los sitios de observación, lo que introduce posibles limitaciones en la precisión de las estimaciones. 
+
+Entre las limitaciones recurrentes se encuentran la disponibilidad limitada de datos ambientales a escala fina, la posible correlación entre distintos contaminantes atmosféricos y la dificultad de distinguir entre efectos causales y asociaciones observacionales. Asimismo, una proporción importante de los estudios utiliza datos de observación provenientes de plataformas de ciencia ciudadana, en lugar de muestreos diseñados específicamente para el estudio, lo que implica confiar en la integridad y calidad de dichas bases de datos.
+
+Finalmente, en cuanto a los resultados ecológicos, varios estudios coinciden en que la contaminación atmosférica puede afectar de manera diferencial a las comunidades de aves urbanas. En general, se observa que las especies más sensibles a perturbaciones ambientales tienden a disminuir su presencia en áreas con mayores niveles de contaminación, mientras que algunas especies generalistas o altamente adaptadas a entornos urbanos muestran una mayor tolerancia a estas condiciones. Diversos mecanismos han sido propuestos para explicar estas relaciones, incluyendo efectos indirectos sobre la disponibilidad de alimento, impactos fisiológicos asociados a la exposición a contaminantes y cambios en la estructura del hábitat urbano. Como resultado, la contaminación puede contribuir a que las comunidades de aves urbanas pasen a estar dominadas por un número reducido de especies tolerantes, mientras que especies más sensibles disminuyen o desaparecen localmente. Estos patrones sugieren que la contaminación atmosférica puede desempeñar un papel relevante en la configuración de la biodiversidad urbana y refuerzan la importancia de analizar cuantitativamente su relación con la presencia de especies individuales.
+
+5. Identificación del vacío
+
+La literatura revisada muestra un patrón relativamente consistente en el estudio de la relación entre perturbaciones ambientales urbanas y la presencia de aves. En particular, varios estudios analizan cómo factores asociados a la urbanización como el ruido o la contaminación atmosférica influyen en la probabilidad de presencia u ocupación de especies en distintos entornos. Para ello, la mayoría de las investigaciones utiliza regresiones logísticas o modelos de ocupación, que permiten relacionar registros de presencia–ausencia con variables ambientales y estimar probabilidades de ocurrencia de las especies (Ortega-Álvarez & MacGregor-Fors, 2011; Silva et al., 2022).
+
+Un supuesto frecuente en estos trabajos es que las variables ambientales utilizadas representan adecuadamente las condiciones a las que están expuestas las especies en los sitios de observación. Sin embargo, en muchos casos estas variables se obtienen a partir de estaciones de monitoreo ambiental ubicadas a cierta distancia de los puntos donde se registran las aves, lo que introduce incertidumbre sobre el grado en que dichas mediciones reflejan las condiciones locales de los sitios de observación.
+
+A partir de la revisión también se identifican varias limitaciones recurrentes. En primer lugar, existe una integración limitada entre registros de observación de aves y datos de contaminación atmosférica, especialmente cuando los datos de aves provienen de plataformas de ciencia ciudadana y deben vincularse con fuentes externas de información ambiental. En segundo lugar, aunque los modelos logísticos y de ocupación son ampliamente utilizados, la mayoría de los estudios adopta enfoques estadísticos frecuentistas, mientras que la aplicación de enfoques bayesianos para analizar la relación entre contaminación atmosférica y presencia de aves sigue siendo relativamente poco común en este tipo de investigaciones. Cabe resaltar que los enfoques bayesianos pueden resultar particularmente útiles en este contexto, ya que permiten incorporar explícitamente la incertidumbre en los parámetros del modelo y combinar información proveniente de diferentes fuentes de datos (Johnson et al., 2013).
+
+Desde una perspectiva empírica, la literatura existente se ha concentrado principalmente en estudios realizados en distintas regiones de América del Norte, Europa y algunas ciudades de América Latina (Silva et al., 2022). Sin embargo, no se identificaron estudios específicos que analicen cuantitativamente la relación entre contaminación atmosférica urbana y probabilidad de presencia de aves utilizando datos de observación en la ciudad de Bogotá, lo que sugiere una oportunidad para explorar este tipo de análisis en el contexto local.
+
+En conjunto, estos elementos permiten identificar un vacío de tipo metodológico y empírico. Desde el punto de vista metodológico, existe una oportunidad para aplicar enfoques bayesianos que permitan estimar probabilidades de presencia de especies incorporando explícitamente la incertidumbre en los parámetros del modelo. Desde el punto de vista empírico, aún son relativamente escasos los estudios que integran registros de observación de aves provenientes de plataformas de ciencia ciudadana con datos de contaminación atmosférica urbana, particularmente en contextos urbanos latinoamericanos como Bogotá.
+
+Este vacío sugiere la pertinencia de desarrollar análisis que integren estas fuentes de información mediante modelos probabilísticos, con el fin de evaluar la relación entre contaminación atmosférica y presencia de aves en contextos urbanos y aportar evidencia empírica para comprender mejor los posibles efectos de la contaminación sobre la biodiversidad urbana.
+
+Referencias
+Ortega-Álvarez, R., & MacGregor-Fors, I. (2011). Effects of traffic noise on occupancy patterns of forest birds. Conservation Biology, 25(4), 867–874.
+
+Silva, C. P., et al. (2022). Urban noise and surrounding city morphology influence green space occupancy by native birds in a Mediterranean-type South American metropolis. Scientific Reports, 12, 5454.
+
+Johnson, D. S., et al. (2013). Efficient Bayesian analysis of occupancy models with logit link functions. Ecology and Evolution, 3(5), 1163–1174.
+
+Dugger, K. M., et al. (2021). Wildfire smoke affects detection of birds in Washington State. The Condor: Ornithological Applications, 123(3), duab028.
+
+6. Declaración formal de contribución
+
+El presente proyecto propone analizar la relación entre la contaminación atmosférica urbana y la probabilidad de presencia del copetón (Zonotrichia capensis) en la ciudad de Bogotá. Para ello se integrarán registros de observación de aves provenientes de plataformas de ciencia ciudadana como eBIRD con datos de contaminación atmosférica obtenidos de la red de Monitoreo de Calidad del Aire de Bogotá (RMCAB).
+
+En particular, el estudio utilizará registros de observación de aves que indican presencia o ausencia de la especie durante eventos de observación, junto con mediciones de contaminantes atmosféricos como material particulado (PM10 y PM2.5) y gases asociados a la contaminación urbana (NO₂, SO₂, CO y O₃). Estas variables permitirán evaluar si existe una relación estadística entre los niveles de contaminación atmosférica y la probabilidad de registrar la especie en distintos momentos y lugares de la ciudad.
+
+Metodológicamente, el proyecto implementará un modelo de regresión logística en un marco bayesiano, en el cual la variable respuesta corresponde a la presencia o ausencia del copetón durante un evento de observación. En este enfoque, las observaciones se modelarán como realizaciones de una distribución Bernoulli cuya probabilidad depende de variables ambientales asociadas a la contaminación atmosférica. El uso de un enfoque bayesiano permitirá estimar distribuciones posteriores para los parámetros del modelo e incorporar explícitamente la incertidumbre en las estimaciones.
+
+La contribución del proyecto consiste en integrar datos de observación de aves con mediciones de contaminación atmosférica en un marco probabilístico bayesiano para estimar la probabilidad de presencia de una especie urbana. A partir de estas estimaciones, el estudio explorará si la presencia del copetón muestra patrones sistemáticos asociados a distintos niveles de contaminación atmosférica, lo que podría sugerir su potencial uso como indicador biológico de la calidad ambiental urbana.
+
+De esta manera, el proyecto busca aportar evidencia empírica sobre la relación entre contaminación atmosférica y presencia del copetón en un contexto urbano latinoamericano específico, así como ilustrar el uso de enfoques bayesianos para modelar datos de presencia–ausencia en estudios ecológicos urbanos. Asimismo, los resultados podrían contribuir a evaluar si una especie urbana ampliamente distribuida como Zonotrichia capensis puede reflejar, al menos parcialmente, variaciones en las condiciones ambientales asociadas a la calidad del aire en la ciudad.
+7. Alcance y viabilidad 
+El proyecto utilizará registros de observación de aves provenientes de plataformas de ciencia ciudadana, específicamente de eBird, que contienen información sobre eventos de observación en los que se reporta la presencia o ausencia de especies. A partir de esta base de datos se seleccionarán los registros correspondientes al copetón (Zonotrichia capensis) dentro del área urbana de la ciudad de Bogotá. Estos registros incluyen información sobre fecha, duración del muestreo, número de observadores, distancia recorrida y características del protocolo de observación.
+
+Para incorporar variables ambientales, se utilizarán datos de calidad del aire provenientes de la red de Monitoreo de Calidad del Aire de Bogotá (RMCAB). Estos datos incluyen mediciones de contaminantes atmosféricos como material particulado (PM10 y PM2.5) y gases asociados a la contaminación urbana, entre ellos NO₂, SO₂, CO y O₃. Cada evento de observación será asociado con la estación de monitoreo más cercana, lo que permitirá construir un conjunto de datos que relacione registros de presencia–ausencia de la especie con variables de contaminación atmosférica y variables asociadas al esfuerzo de observación.
+
+La variable objetivo del modelo será una variable binaria que indique la presencia o ausencia del copetón en cada evento de observación. Como variables explicativas principales se considerarán los niveles de contaminantes atmosféricos registrados en las estaciones cercanas. Adicionalmente, se incluirán variables asociadas al esfuerzo de observación, como la duración del muestreo, la distancia recorrida y el número de observadores, con el fin de controlar posibles sesgos asociados al proceso de detección de la especie.
+
+Desde el punto de vista metodológico, se implementará un modelo de regresión logística en un marco bayesiano, en el cual las observaciones se modelan como realizaciones de una distribución Bernoulli cuya probabilidad depende de variables ambientales y de observación. Este enfoque permitirá estimar distribuciones posteriores para los coeficientes asociados a cada variable explicativa y evaluar la dirección e intensidad de la relación entre contaminación atmosférica y probabilidad de presencia de la especie. Como métricas de evaluación se considerarán la significancia de los coeficientes estimados y la capacidad del modelo para describir los patrones observados en los datos.
+
+Es importante señalar que el proyecto no buscará establecer relaciones causales estrictas entre contaminación atmosférica y presencia de la especie, sino identificar asociaciones estadísticas entre estas variables. Tampoco se desarrollarán modelos ecológicos complejos de dinámica poblacional ni análisis de múltiples especies, ya que el enfoque se centrará en una especie urbana específica y en la relación entre su presencia y variables ambientales.
+
+La viabilidad del proyecto se sustenta en la disponibilidad pública de los datos necesarios, tanto de observaciones de aves como de mediciones de calidad del aire. Además, el modelo estadístico propuesto puede implementarse utilizando herramientas computacionales ampliamente disponibles para inferencia bayesiana.
+
+Dado que el análisis se basa en datos existentes y en un modelo estadístico relativamente acotado, se considera factible completar las etapas de procesamiento de datos, estimación del modelo y análisis de resultados dentro del plazo aproximado de tres meses establecido para el desarrollo del proyecto.
