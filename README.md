@@ -62,7 +62,7 @@ El dataset final para el modelo (`copeton_occupancy_ready.csv`) fue validado med
 - **Estaciones con más datos**: Bolivia y MinAmbiente.
 - **Calidad**: 0 nulos y 0 duplicados tras el proceso de destilación.
 
-Para más detalle, ver el [Informe EDA Copetón](file:///c:/Users/Miguel%20Camargo/Desktop/Proyecto_Bayesiana/eda_copeton/copeton_report.md).
+Para más detalle, ver el [Informe EDA Copetón](./03_eda_copeton/copeton_report.md).
 
 ## Opciones de Avances y Actualizaciones (Historial)
 

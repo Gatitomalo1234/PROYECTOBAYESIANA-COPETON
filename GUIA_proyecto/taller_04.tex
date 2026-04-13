@@ -219,4 +219,248 @@ Culminada la exploración visual y probabilística de la base de datos, el dise�
     \item \textbf{Estación y Protocolo:} Factores geográficos y metodológicos adheridos de forma obligatoria tras sus colosales pruebas de Chi-Cuadrado ($p < 0.0001$), neutralizando así el grave sesgo visual humano que destrozaría cualquier modelo básico.
 \end{itemize}
 
+
+% ============================================================
+\section{Parte 4 --- Diseño del Modelo Bayesiano de Ocupación}
+% ============================================================
+
+Culminado el análisis exploratorio, esta sección formaliza la arquitectura matemática del modelo que procesará los datos consolidados. Se trata de un \textbf{Modelo Jerárquico Bayesiano de Ocupación} que separa el estado ecológico real del ave (ocupación latente $\psi$) del error de observación humana (detección $p$), siguiendo la formulación eficiente de Clark \& Altwegg (2019) con aumento de datos de Pólya-Gamma.
+
+\subsection*{4.1 Fundamento: El Teorema de Bayes}
+
+La meta del análisis es hallar la \textbf{Distribución Posterior} de los parámetros ($\theta$), dado que hemos observado ciertos datos ($D$):
+
+\begin{equation}
+  P(\theta \mid D) = \frac{P(D \mid \theta)\, P(\theta)}{P(D)}
+\end{equation}
+
+Donde:
+\begin{itemize}
+  \item $P(D \mid \theta)$ es la \textbf{Likelihood} (Verosimilitud): ¿Qué tan probables son los datos según nuestros parámetros?
+  \item $P(\theta)$ es la \textbf{Prior}: Nuestra suposición inicial sobre los parámetros antes de observar los datos.
+  \item $P(D)$ es la \textit{evidencia}, una constante de normalización que se ignora en el muestreo MCMC.
+\end{itemize}
+
+\subsection*{4.2 Separación de Parámetros: Beta vs. Alpha}
+
+En los modelos jerárquicos de ocupación se independiza matemáticamente el ecosistema real del error humano de observación. Por convención, el modelo se fractura en dos mundos que nunca se confunden:
+
+\begin{itemize}
+  \item \textbf{Mundo Ecológico --- Parámetros Beta ($\beta$):} Modelan exclusivamente la \textbf{Biología} de la especie (Ocupación latente $\psi$). Responden a la pregunta: \textit{¿El ecosistema permite que el ave viva en este sitio?} Cuentan con un intercepto ecológico base ($\beta_0$).
+  \item \textbf{Mundo Humano --- Parámetros Alpha ($\alpha$):} Modelan exclusivamente el \textbf{Error Observacional} (Detección $p$). Responden a la pregunta: \textit{Asumiendo que el ave sí estaba presente, ¿el pajarero logró registrarla?} Cuentan con un intercepto de detectabilidad base ($\alpha_0$).
+\end{itemize}
+
+Esta separación es fundamental: si usáramos los mismos símbolos para ambos ejes, un evaluador podría confundir el efecto del protocolo de observación (variable humana) con un supuesto efecto biológico sobre la especie. Los $\beta$ pertenecen a la ecología; los $\alpha$ al error humano.
+
+\subsection*{4.3 Especificación de las Priors (No Informativas)}
+
+A partir del EDA realizado, los hiperparámetros se configuran sobre dos componentes aislados:
+
+\begin{itemize}
+  \item \textbf{Ecuación de Ocupación Ecológica ($\psi$):} Estructurada por $\beta_0$ (intercepto base), $\beta_{\text{PM10}}$ (efecto del $\text{PM}_{10}$) y $\beta_{\text{O3}}$ (efecto del Ozono).
+  \item \textbf{Ecuación de Detección/Esfuerzo ($p$):} Estructurada por $\alpha_0$ (intercepto base), $\alpha_{\text{duracion}}$ (tiempo en minutos), $\alpha_{\text{estacion}}$ (heterogeneidad geográfica) y $\alpha_{\text{protocolo}}$.
+\end{itemize}
+
+Para acoplarse al aumento de variables de Pólya-Gamma y a la función logística (Logit), todas las pre-creencias sobre los coeficientes se modelan con \textbf{Distribuciones Normales} no informativas. Cada coeficiente distribuye de manera independiente:
+
+\medskip
+\textbf{Eje Ecológico ($\psi$):}
+\begin{align}
+  \beta_0 &\sim \mathcal{N}(0,\, 1) \\
+  \beta_{\text{PM10}} &\sim \mathcal{N}(0,\, 1) \\
+  \beta_{\text{O3}} &\sim \mathcal{N}(0,\, 1)
+\end{align}
+
+\textbf{Eje de Detección ($p$):}
+\begin{align}
+  \alpha_0 &\sim \mathcal{N}(0,\, 1) \\
+  \alpha_{\text{duracion}} &\sim \mathcal{N}(0,\, 1) \\
+  \alpha_{\text{estacion}} &\sim \mathcal{N}(0,\, 1) \\
+  \alpha_{\text{protocolo}} &\sim \mathcal{N}(0,\, 1)
+\end{align}
+
+\textbf{Eje Latente de Acondicionamiento ($\omega$):}
+\begin{equation}
+  \omega \sim \mathcal{PG}(b=1,\; c=0)
+\end{equation}
+
+La distribución Pólya-Gamma (Polson et al., 2013) fija $b=1$ al estar condicionada a la verosimilitud binaria de eBird, y ancla $c=0$ para que su media sea neutra, comportándose como un acondicionador universal.
+
+\subsubsection*{Justificación Metodológica de la Prior No Informativa}
+
+El uso estricto de una prior neutra $\mathcal{N}(0, 1)$ se fundamenta en una \textbf{premisa de objetividad por falta de experticia a priori}:
+
+\begin{itemize}
+  \item Como equipo, no somos ornitólogos expertos como para asegurar puntualmente qué tanto un microgramo de Ozono diezma a las poblaciones de \textit{Z. capensis}. Al no saberlo, nos declaramos ignorantes fijando la expectativa central en cero ($\mu_0 = 0$).
+  \item Modificar la media o la varianza para ``ajustar'' el modelo, aunque fuera en un mísero $0.01$, implicaría insertar conocimiento preconcebido, sesgando irreparablemente el diseño algorítmico.
+  \item Si el modelo decreta que la polución impacta la ocupación, ese descubrimiento proviene \textbf{única y exclusivamente} de la presión de los datos de eBird sobre nuestra hoja en blanco empírica, no de un juicio personal embebido en el código.
+\end{itemize}
+
+\subsection*{4.4 La Likelihood (Verosimilitud): De la Bernoulli a la Pólya-Gamma}
+
+Entender de dónde sale la verosimilitud final es la clave para defender la metodología. El proceso sigue una lógica de tres escalones:
+
+\subsubsection*{Paso 1: La Naturaleza Binaria (Bernoulli)}
+
+En cada evento de observación, el resultado es binario: ``vi al Copetón (1)'' o ``no lo vi (0)''. La verosimilitud de un solo dato $y_i$ (presencia/ausencia) se define como:
+
+\begin{equation}
+  P(y_i \mid \psi_i) = \psi_i^{\,y_i}\,(1 - \psi_i)^{1-y_i}
+\end{equation}
+
+\subsubsection*{Paso 2: El Enlace Logístico (Inverse-Logit)}
+
+Para vincular la probabilidad biológica $\psi_i$ con las variables ambientales $X_i\beta$, se usa la función Inverse-Logit, que fuerza cualquier valor real al intervalo $(0,1)$:
+
+\begin{equation}
+  \psi_i = \frac{e^{X_i\beta}}{1 + e^{X_i\beta}}
+\end{equation}
+
+Al sustituir esta expresión en la Bernoulli del Paso~1, se llega a la expresión computacionalmente difícil:
+
+\begin{equation}
+  P(y_i \mid X_i\beta) = \frac{\left(e^{X_i\beta}\right)^{y_i}}{1 + e^{X_i\beta}}
+\end{equation}
+
+El denominador $\left(1 + e^{X_i\beta}\right)$ es no lineal. Al multiplicarlo con la Prior Normal, los exponentes no se cancelan limpiamente, por lo que no existe una solución analítica directa (``solución cerrada''). El algoritmo se vería obligado a adivinar la forma de la curva a ciegas, iteración a iteración (Metropolis-Hastings).
+
+\subsubsection*{Paso 3: El Acondicionamiento Estocástico (Identidad de Pólya-Gamma)}
+
+Para romper el denominador intratable, Clark (2019) aplica la identidad de Polson et al.\ (2013). Esta identidad permite reescribir la probabilidad como una integral ponderada por la variable latente $\omega$:
+
+\begin{equation}
+  \underbrace{\dfrac{\left(e^{\psi}\right)^y}{1+e^{\psi}}}_{\text{Inverse-Logit}}
+  \;=\;
+  \underbrace{\dfrac{1}{2}\exp\!\left((y - \tfrac{1}{2})\psi\right)}_{\text{Capa Lineal}}
+  \int_0^{\infty}
+  \underbrace{\exp\!\left(-\dfrac{\omega\,\psi^2}{2}\right)}_{\text{Capa Cuadrática (Normal)}}
+  p(\omega \mid 1,\, 0)\; d\omega
+  \label{eq:pg_identity}
+\end{equation}
+
+De la ecuación~\eqref{eq:pg_identity} se desprenden dos consecuencias clave:
+
+\begin{itemize}
+  \item \textbf{El Transformador Latente ($\omega$):} No es un parámetro fijo, es una \textbf{variable latente estocástica}. En cada iteración se le pregunta a la distribución $\mathcal{PG}(1,0)$: \textit{``¿Qué peso necesito para que este dato de eBird se vea lineal?''}. El valor $\omega_i$ resultante ``endereza'' localmente la curva del Logit.
+  \item \textbf{La Linealización:} El término $\exp\!\left(-\tfrac{\omega\psi^2}{2}\right)$ es una \textbf{estructura cuadrática en el exponente}. En estadística, una parábola en el exponente es la firma matemática de una \textbf{Distribución Normal}.
+\end{itemize}
+
+Dado que la Prior también es Normal, al tener una Likelihood que se comporta como Normal y una Prior Normal, el producto de ambas produce una \textbf{solución cerrada} (otra Normal). El modelo deja de ``adivinar'' y puede calcular la respuesta de forma directa y exacta.
+
+\medskip
+La \textbf{Likelihood Aumentada de Datos Completos} para los $N$ sitios y $K_i$ visitas por sitio queda entonces como:
+
+\begin{equation}
+  L\!\left(y, z, \omega \mid \beta, \alpha\right)
+  = \prod_{i=1}^N
+    \underbrace{P\!\left(z_i,\, \omega^\psi_i \mid \beta\right)}_{\text{Capa Biológica}}
+    \cdot
+    \prod_{j=1}^{K_i}
+    \underbrace{P\!\left(y_{i,j},\, \omega^p_{i,j} \mid z_i,\, \alpha\right)}_{\text{Capa Humana}}
+\end{equation}
+
+Donde:
+\begin{itemize}
+  \item \textbf{Capa Biológica:} $z_i \sim \text{Bernoulli}(\psi_i)$. La contaminación empuja $\psi_i \to 0$.
+  \item \textbf{Capa Humana:} $y_{i,j} \sim \text{Bernoulli}(z_i \cdot p_{i,j})$. Si $z_i = 0$ (el ave fue extirpada por el $\text{PM}_{10}$), todo el esfuerzo humano se multiplica por cero ($0 \times p = 0$). No se puede detectar lo que no está presente.
+\end{itemize}
+
+\subsection*{4.5 Construcción de la Posterior Paso a Paso}
+
+Aquí es donde se fusiona todo el conocimiento previo con la evidencia de los datos.
+
+\subsubsection*{La Fórmula de la Posterior Conjunta}
+
+Aplicando la regla de Bayes al modelo aumentado, la \textbf{Posterior Conjunta} es proporcional al producto de la Likelihood Aumentada por todas las Priors:
+
+\begin{equation}
+  \boxed{
+  P\!\left(\beta, \alpha, \mathbf{z}, \boldsymbol{\omega} \mid \mathbf{y}\right)
+  \;\propto\;
+  \underbrace{L\!\left(\mathbf{y}, \mathbf{z}, \boldsymbol{\omega} \mid \beta, \alpha\right)}_{\text{Datos (Likelihood)}}
+  \;\times\;
+  \underbrace{\pi(\beta)\;\pi(\alpha)\;\pi(\boldsymbol{\omega})}_{\text{Ignorancia (Priors)}}
+  }
+\end{equation}
+
+Al sustituir los componentes, se observa la fusión completa:
+
+\begin{multline}
+  P\!\left(\beta, \alpha, \mathbf{z}, \boldsymbol{\omega} \mid \mathbf{y}\right)
+  \;\propto\;
+  \prod_{i=1}^N
+  \left[
+    P\!\left(z_i, \omega^\psi_i \mid \beta\right)
+    \prod_{j=1}^{K_i}
+    P\!\left(y_{i,j}, \omega^p_{i,j} \mid z_i, \alpha\right)
+  \right] \\
+  \times\;
+  \mathcal{N}(\beta \mid 0, 1)
+  \;\times\;
+  \mathcal{N}(\alpha \mid 0, 1)
+  \;\times\;
+  \mathcal{PG}(\omega \mid 1, 0)
+\end{multline}
+
+\subsubsection*{La Solución por Bloques: Muestreo de Gibbs (Gibbs Sampling)}
+
+Como no es posible resolver la ecuación conjunta de una sola vez, el modelo la rompe en \textbf{4 bloques iterativos} que se actualizan en ciclo:
+
+\begin{enumerate}
+  \item \textbf{Bloque $z$ (Estado Latente):} Se imputa el estado real del ave en los sitios donde no hubo detección, comparando la probabilidad de extirpación ecológica contra la de fallo observacional del pajarero.
+  \item \textbf{Bloque $\omega$ (Acondicionamiento):} Se generan las variables latentes Pólya-Gamma que aplanan el Logit para convertirlo en una distribución Normal.
+  \item \textbf{Bloque $\beta$ (Ecología):} Se calculan los efectos del $\text{PM}_{10}$ y el $\text{O}_3$. Gracias a $\omega$, este paso tiene una distribución \textbf{Normal} de solución directa.
+  \item \textbf{Bloque $\alpha$ (Humano):} Se calculan los efectos del esfuerzo del pajarero (duración, protocolo, estación). Igualmente resulta en una distribución \textbf{Normal} de solución directa.
+\end{enumerate}
+
+\subsubsection*{La Mecánica de la Solución Cerrada (Conjugación Normal-Normal)}
+
+En cada iteración de los Bloques 3 y 4, la Posterior de los coeficientes se calcula mediante conjugación \textbf{Normal--Normal}. Las fórmulas de actualización son:
+
+\medskip
+\textbf{1. Varianza Posterior Actualizada ($V_n$):}
+\begin{equation}
+  V_n = \left(X^T \Omega\, X + V_0^{-1}\right)^{-1}
+\end{equation}
+
+donde $\Omega = \text{diag}(\omega_1, \dots, \omega_N)$ es la matriz diagonal de los pesos fantasmas y $V_0^{-1}$ es la precisión de la Prior (para $\mathcal{N}(0,1)$, $V_0^{-1} = I$).
+
+\medskip
+\textbf{2. Media Posterior Actualizada ($\mu_n$):}
+\begin{equation}
+  \mu_n = V_n \left(X^T \kappa + V_0^{-1}\,\mu_0\right)
+\end{equation}
+
+donde $\kappa_i = y_i - \tfrac{1}{2}$ son los datos de eBird centrados y $\mu_0 = \mathbf{0}$ es nuestra media inicial de ignorancia.
+
+\medskip
+Este mecanismo convierte un problema de optimización no lineal y lento en una serie de \textbf{operaciones algebraicas directas y exactas}, garantizando la convergencia eficiente del modelo.
+
+\subsubsection*{La Convergencia de las Cadenas de Markov}
+
+El ciclo de 4 bloques se repite miles de veces. Al principio, los valores saltan erráticamente (período de \textit{burn-in}, ${\sim}1{,}000$ iteraciones, se descartan). Tras la convergencia, los siguientes ${\sim}10{,}000$ valores constituyen la muestra empírica de la Posterior: la respuesta final del modelo.
+
+\subsection*{4.6 Resultado Final: Los Parámetros Posteriores}
+
+Al terminar el proceso, el modelo entrega miles de muestras de la Posterior. Para cada contaminante se obtienen:
+
+\begin{enumerate}
+  \item \textbf{Estimación puntual:} La media o mediana de la distribución posterior.
+  \item \textbf{Incertidumbre cuantificada:} Intervalos de Credibilidad al 95\%.
+\end{enumerate}
+
+\medskip
+\textbf{Interpretación Biológica:}
+Si el intervalo de credibilidad al 95\% del coeficiente $\beta_{\text{PM10}}$ no incluye al cero y es completamente negativo:
+
+\begin{equation}
+  \text{IC}_{95\%}[\beta_{\text{PM10}}] < 0
+\end{equation}
+
+habremos demostrado que el $\text{PM}_{10}$ reduce significativamente la probabilidad de ocupación del Copetón (\textit{Zonotrichia capensis}) en Bogotá, \textbf{habiendo controlado todo el ruido de imperfección de detección humana} a través de la capa jerárquica de los parámetros $\alpha$.
+
+\vfill
+\noindent\rule{\textwidth}{0.4pt}
+\small\textit{Referencias metodológicas: Clark \& Altwegg (2019). Efficient Bayesian analysis of occupancy models with logit link functions. \textbf{Ecology and Evolution}. Polson, Scott \& Windle (2013). Bayesian Inference for Logistic Models Using Pólya-Gamma Latent Variables. \textbf{Journal of the American Statistical Association}.}
+
 \end{document}
