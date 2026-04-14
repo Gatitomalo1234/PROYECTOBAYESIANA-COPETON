@@ -1,0 +1,95 @@
+\usepackage[utf8]{inputenc}
+\usepackage{pxfonts}
+\usepackage{wasysym} % symbols
+\usepackage{amssymb} % symbols
+\usepackage{abstract}
+\usepackage{parskip}
+\usepackage{hyperref}
+%\def\sym##1{\ifmmode^{##1}\else\(^{##1}\)\fi}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{natbib}
+
+\hypersetup
+{
+    colorlinks = false,
+    linkbordercolor = {white}, citebordercolor = {white}
+}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{blindtext}% only for dummy text
+\usepackage{fancyhdr}
+\usepackage{titling}
+\usepackage{caption}
+\captionsetup[table]{
+  position=above,
+  justification=raggedright,
+  labelsep=newline, % <<< label and text on different lines
+  singlelinecheck=false % <<< raggadright also when the caption is shorter
+                        % than a single line
+}
+\usepackage[document]{ragged2e}
+\usepackage[affil-sl]{authblk} 
+\usepackage{mathptmx}  %Times new Roman
+
+\setlength{\columnsep}{1cm}
+\renewcommand{\refname}{BIBLIOGRAFÍA}
+\renewcommand{\figurename}{Fig.}
+\renewcommand{\tablename}{Tabla.}
+\renewcommand{\abstractname}{RESUMEN}
+
+% Keywords command
+\providecommand{\keywordsSpan}[1]
+{
+  \small	
+  \textbf{\textit{Palabras Clave:}} #1
+}
+
+\providecommand{\keywordsEng}[1]
+{
+  \small	
+  \textbf{\textit{Keywords:}} #1
+}
+
+
+%%%%%%%% FORMATO DE LAS SECCIONES Y SUBSECCIONES %%%%%
+\titleformat{\section} 
+	{\normalfont\large\bfseries}{\makebox[30pt][l]{\thesection}}{0pt}{} 
+\titleformat{\subsection} 
+	{\normalfont\large\bfseries }{\makebox[30pt][l]{\thesubsection}}{0pt}{}
+\renewcommand\thesection{\arabic{section}.}
+\renewcommand\thesubsection{\thesection\arabic{subsection}}
+%%%%%%%% FORMATO DE LAS SECCIONES Y SUBSECCIONES %%%%%
+
+
+	
+\makeatletter
+\long\def\@makecaption#1#2{
+\vskip\abovecaptionskip
+\sbox\@tempboxa{#1. #2}
+\ifdim \wd\@tempboxa >\hsize
+#1. #2\par
+\else
+\global \@minipagefalse
+\hb@xt@\hsize{\hfil\box\@tempboxa\hfil}
+\fi
+\vskip\belowcaptionskip}
+\makeatother
+
+
+\pagestyle{fancyplain}% <- pagestyle fancyplain
+
+\fancyfoot[C]{}
+\renewcommand\plainheadrulewidth{.4pt}% headrule on plain pages
+%\fancyhf{}
+\rhead{Semestre 4, Año 2026}
+\lhead{Estadística Bayesiana}
+\rfoot{\thepage}
+
+
+%%%%%% CORRESPONSE AUTHOR %%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\date{}

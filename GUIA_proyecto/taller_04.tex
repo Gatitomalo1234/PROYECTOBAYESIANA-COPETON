@@ -219,6 +219,38 @@ Culminada la exploración visual y probabilística de la base de datos, el dise�
     \item \textbf{Estación y Protocolo:} Factores geográficos y metodológicos adheridos de forma obligatoria tras sus colosales pruebas de Chi-Cuadrado ($p < 0.0001$), neutralizando así el grave sesgo visual humano que destrozaría cualquier modelo básico.
 \end{itemize}
 
+\vspace{0.5cm}
+
+% ============================================================
+\section{Parte 3.5 --- Preparación de Datos: Estandarización}
+% ============================================================
+
+Antes de proceder al diseño del modelo bayesiano, se ejecutó un paso crítico de pre-procesamiento: la \textbf{Estandarización de Variables} (también conocida como $Z$-scaling). Este procedimiento es un requisito técnico indispensable para garantizar que el motor de inferencia probabilística funcione correctamente.
+
+\subsection*{3.5.1 Definición y Selección de Variables}
+La estandarización consiste en transformar cada observación $x$ de una variable de la siguiente forma:
+
+\begin{equation}
+    z = \frac{x - \mu}{\sigma}
+    \label{eq:zscore}
+\end{equation}
+
+Donde $\mu$ es el promedio y $\sigma$ la desviación estándar de la variable original. Al aplicar esta ecuación, la nueva variable $z$ queda centrada en cero y escalada a una varianza unitaria. En este estudio, se decidió aplicar este proceso selectivamente:
+
+\end{itemize}
+
+\subsection*{3.5.2 Justificación e Impacto en el Modelo}
+La decisión de estandarizar las variables continuas tiene tres consecuencias vitales para el éxito de la Entrega 1:
+
+\begin{enumerate}
+    \item \textbf{Convergencia Acelerada:} Los algoritmos MCMC (Markov Chain Monte Carlo) convergen mucho más rápido cuando la superficie de probabilidad es esférica y no está alargada por las diferencias de unidades de los predictores.
+    \item \textbf{Comparabilidad de Coeficientes:} Al estar todas las variables en la misma dimensión (desviaciones estándar), se podrá comparar directamente el "peso" biológico de la contaminación. Se podrá afirmar, por ejemplo, si un aumento de 1 desv. est. de $PM_{10}$ es más perjudicial para el copetón que un aumento similar de $O_3$.
+    \item \textbf{Alineación con las Priors:} Nuestras distribuciones a priori no informativas $\mathcal{N}(0, 1)$ están diseñadas para datos estandarizados. Un coeficiente de 1 en una variable estandarizada significa una duplicación aproximada en la escala logit; si la variable no estuviera estandarizada y su rango fuera enorme (como el $PM_{10}$), la misma prior sería demasiado restrictiva.
+\end{enumerate}
+
+\vfill
+\noindent\rule{\textwidth}{0.4pt}
+\small\textit{Este paso de estandarización convierte al dataset consolidado en la matriz definitiva de entrada para el motor bayesiano.}
 
 % ============================================================
 \section{Parte 4 --- Diseño del Modelo Bayesiano de Ocupación}
