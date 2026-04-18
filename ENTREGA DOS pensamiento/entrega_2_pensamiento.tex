@@ -1,0 +1,90 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{float}
+
+\geometry{margin=1in}
+
+\title{Entrega 2: Pensamiento Estratégico y Diseño de Investigación}
+\author{Nicolás Cárdenas, Miguel Camargo, Brayan Hernández}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Profundización de la Entrega 1}
+
+La investigación sobre la persistencia del copetón (\textit{Zonotrichia capensis}) en Bogotá se enfrenta a un desafío crítico: la "Paradoja de la Visibilidad". Aunque esta especie es común y fácil de observar, su abundancia aparente puede estar ocultando declives poblacionales silenciosos provocados por la contaminación atmosférica. 
+
+\subsection*{Problema Refinado}
+El problema central radica en la falta de modelos que separen el error observacional (la probabilidad de que alguien no vea al ave aunque esté presente) del estado ecológico real del ave. Bogotá presenta niveles de $PM_{10}$ y $O_3$ que exceden los límites de salud pública, y se desconoce cómo estas sustancias afectan la tasa de ocupación real de la especie una vez descontado el ruido de los reportes ciudadanos.
+
+\subsection*{Pregunta de Investigación Refinada}
+¿Cómo afectan los niveles de contaminantes atmosféricos ($PM_{10}$ y $O_3$) a la probabilidad de ocupación del copetón (\textit{Zonotrichia capensis}) en Bogotá, controlando por la variabilidad en el esfuerzo de detección de los observadores?
+
+\subsection*{Revisión de Literatura Fortalecida y Vacío de Investigación}
+La literatura internacional reconoce a las aves como centinelas ambientales debido a su sensibilidad respiratoria. Sin embargo, en el contexto de Bogotá, existe un **vacío de investigación claro**: la mayoría de los estudios locales son descriptivos y no analizan de forma conjunta los datos de la Red de Monitoreo de Calidad del Aire (RMCAB) con modelos jerárquicos de ocupación que asuman detección imperfecta. Este trabajo utiliza la lógica Bayesiana para llenar ese vacío estadístico.
+
+\section{Sección de Metodología}
+
+Esta investigación se desarrolla bajo un diseño cuantitativo observacional que integra datos biológicos de eBird con registros horarios de contaminantes.
+
+\subsection*{Enfoque del Estudio}
+Se adopta un enfoque Bayesiano Jerárquico. Esta elección permite tratar los parámetros del modelo (ocupación y detección) como distribuciones de probabilidad, incorporando la incertidumbre propia del muestreo biológico.
+
+\subsection*{Datos}
+Se consolidó una base de datos de 910 unidades de muestreo únicas. Se filtraron únicamente "Listas Completas" para asegurar que la ausencia de reporte sea interpretable estadísticamente. Las variables fueron estandarizadas mediante $Z$-score para garantizar la convergencia del modelo.
+
+\subsection*{Estrategia Metodológica y Justificación del Modelo}
+Se utiliza un modelo de ocupación de una sola temporada con aumento de datos de Pólya-Gamma. Esta técnica permite linealizar el modelo logístico, facilitando el uso de Muestreo de Gibbs. Se justifica su uso porque permite separar la probabilidad de ocupación ($\psi$) de la probabilidad de detección ($p$), evitando sesgos por esfuerzo de observación.
+
+\subsection*{Limitaciones}
+El estudio asume que las poblaciones están "cerradas" (no hay migración) durante las ventanas de observación y que la representación de los contaminantes en la estación más cercana es fiel a lo que el ave respira en el punto exacto del registro.
+
+\section{Análisis Exploratorio de Datos (EDA)}
+
+El Análisis Exploratorio no es un simple paso descriptivo; es el fundamento que justifica por qué necesitamos un modelo Bayesiano complejo en lugar de una estadística tradicional. A continuación, desglosamos los hallazgos basados en nuestras subpreguntas críticas.
+
+\subsection*{Subpreguntas Analíticas}
+\begin{itemize}
+    \item \textbf{SQ1 (Naturaleza del Dato):} ¿La asimetría de los contaminantes invalida los métodos lineales clásicos?
+    \item \textbf{SQ2 (Ruido Humano):} ¿Es la duración del esfuerzo un predictor crítico que "ensucia" la observación del ave?
+    \item \textbf{SQ3 (Huella Espacial):} ¿Existe una dependencia crítica entre la ubicación geográfica y la polución reportada?
+\end{itemize}
+
+\subsection*{Resultados y su Interpretación en Palabras Sencillas}
+
+El análisis de los datos reveló una realidad compleja que dividimos en tres grandes hallazgos:
+
+\textbf{1. La "Mentira" de los Promedios (Asimetría):}
+Al analizar las curvas de densidad del $PM_{10}$ y el $O_3$, encontramos un sesgo positivo extremo. En palabras sencillas: Bogotá vive la mayor parte del tiempo con niveles de polución aceptables, pero sufre picos tóxicos esporádicos muy altos. Usar promedios tradicionales sería ignorar estos picos que, biológicamente, son los que más estresan al copetón. Esto justifica el uso de \textbf{Priors Bayesianas}, que permiten al modelo "aprender" de estos extremos sin colapsar ante la falta de normalidad.
+
+\textbf{2. La Paciencia del Observador (Detección):}
+El hallazgo más contundente del EDA fue que la probabilidad de reportar al ave no depende solo de si el ave está ahí, sino de cuánto tiempo se queda el observador mirando. Encontramos que el $p$-valor para la variable \textit{Duration} es menor a 0.0001. Esto significa que si un pajarero observa por solo 5 minutos y no ve al copetón, es muy probable que sea un **falso negativo**. Esta "incertidumbre humana" es lo que separa nuestro modelo de uno simple: nosotros no asumimos que "no visto" es igual a "ausencia"; lo tratamos como una probabilidad.
+
+\textbf{3. El Filtro del Estrato Bajo (Multicolinealidad):}
+Encontramos una redundancia muy alta ($\rho = 0.77$) entre el $PM_{10}$ (grueso) y el $PM_{2.5}$ (fino). Decidimos quedarnos únicamente con el \textbf{$PM_{10}$} porque, por la biología del copetón (que forrajea en el suelo y arbustos bajos), es el contaminante que mejor representa el aire pesado que respira el ave en su nicho específico.
+
+\subsection*{Implicaciones para el Modelo (Decisiones de Diseño)}
+
+De este entendimiento surgen tres decisiones obligatorias para el diseño del modelo:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Desacoplamiento:} El modelo debe tener dos capas. Una capa biológica para la contaminación y una humana para el esfuerzo de observación. Si no separamos la duración del ruido, podríamos culpar erróneamente a la contaminación por una ausencia que fue responsabilidad del observador.
+    \item \textbf{Estandarización ($Z$-score):} Como los contaminantes se miden en escalas diferentes ($ppm$ vs $ppb$), los convertimos a una escala común. Esto permite que el modelo Gibbs compare "peras con peras" al calcular los coeficientes de impacto.
+    \item \textbf{Control Geográfico:} La estación de monitoreo será un control obligatorio. Diferentes barrios tienen "firmas" de polución distintas, y el modelo debe reconocer esta heterogeneidad espacial.
+\end{enumerate}
+
+\begin{thebibliography}{9}
+\bibitem{clark2019} Clark, A. E., \& Altwegg, R. (2019). Efficient Bayesian analysis of occupancy models with logit link functions. \textit{Ecology and Evolution}.
+\bibitem{polson2013} Polson, N. G., Scott, J. G., \& Windle, J. (2013). Bayesian inference for logistic models using Pólya–Gamma latent variables. \textit{JASA}.
+\bibitem{mackenzie2002} MacKenzie, D. I., et al. (2002). Estimating site occupancy rates when detection probabilities are less than one. \textit{Ecology}.
+\end{thebibliography}
+
+\end{document}
